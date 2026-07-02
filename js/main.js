@@ -72,8 +72,6 @@ form.addEventListener("submit", async (e) => {
   }
 });
 
-const privacyModal = document.getElementById("privacy-modal");
-
 function openSheet(dialog) {
   dialog.showModal();
   requestAnimationFrame(() => {
@@ -86,17 +84,19 @@ function closeSheet(dialog) {
   dialog.addEventListener("transitionend", () => dialog.close(), { once: true });
 }
 
-document.getElementById("privacy-link").addEventListener("click", () => {
-  openSheet(privacyModal);
-});
-document.getElementById("privacy-close").addEventListener("click", () => {
-  closeSheet(privacyModal);
-});
-privacyModal.addEventListener("click", (e) => {
-  if (e.target === privacyModal) {
-    closeSheet(privacyModal);
-  }
-});
+function wireSheet(openTriggerId, closeButtonId, dialogId) {
+  const dialog = document.getElementById(dialogId);
+  document.getElementById(openTriggerId).addEventListener("click", () => openSheet(dialog));
+  document.getElementById(closeButtonId).addEventListener("click", () => closeSheet(dialog));
+  dialog.addEventListener("click", (e) => {
+    if (e.target === dialog) {
+      closeSheet(dialog);
+    }
+  });
+}
+
+wireSheet("privacy-link", "privacy-close", "privacy-modal");
+wireSheet("offer-details-link", "offer-close", "offer-modal");
 
 const description = document.getElementById("description");
 const signupStep = document.getElementById("signup-step");
