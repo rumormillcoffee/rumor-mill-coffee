@@ -48,3 +48,16 @@ form.addEventListener("submit", async (e) => {
     button.disabled = false;
   }
 });
+
+const privacyModal = document.getElementById("privacy-modal");
+document.getElementById("privacy-link").addEventListener("click", () => {
+  privacyModal.showModal();
+});
+document.getElementById("privacy-close").addEventListener("click", () => {
+  privacyModal.close();
+});
+privacyModal.addEventListener("click", (e) => {
+  if (e.target === privacyModal) {
+    privacyModal.close();
+  }
+});

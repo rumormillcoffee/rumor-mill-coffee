@@ -32,12 +32,20 @@
       <button type="submit">Notify Me</button>
     </form>
     <p id="form-message" class="form-message" role="status" aria-live="polite"></p>
+    <button type="button" id="privacy-link" class="privacy-link">Privacy Policy</button>
   </section>
 
   <footer class="tagline">
     <p>spread<span class="divider"></span>the<span class="divider"></span>word</p>
   </footer>
 </main>
+
+<dialog id="privacy-modal" class="privacy-modal">
+  <h2>Privacy Policy</h2>
+  <p>We collect only your email address, and use it solely to let you know about upcoming limited-release coffee drops.</p>
+  <p>We don't sell, rent, or share your information with anyone else. To be removed at any time, just email <a href="mailto:hello@rumormillcoffee.com">hello@rumormillcoffee.com</a>.</p>
+  <button type="button" id="privacy-close" class="privacy-close">Close</button>
+</dialog>
 
 <script src="js/main.js"></script>
 </body>

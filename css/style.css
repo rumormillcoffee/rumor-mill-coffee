@@ -141,6 +141,68 @@ body {
   color: #a3d9b1;
 }
 
+.privacy-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 0.7rem;
+  color: rgba(242, 240, 236, 0.45);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.privacy-link:hover {
+  color: rgba(242, 240, 236, 0.7);
+}
+
+.privacy-modal {
+  max-width: 420px;
+  width: calc(100% - 3rem);
+  padding: 2rem;
+  border: 1px solid rgba(242, 240, 236, 0.2);
+  border-radius: 4px;
+  background: #141414;
+  color: #f2f0ec;
+}
+
+.privacy-modal::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.privacy-modal h2 {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.privacy-modal p {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: rgba(242, 240, 236, 0.8);
+  margin-bottom: 1rem;
+}
+
+.privacy-modal a {
+  color: inherit;
+}
+
+.privacy-close {
+  padding: 0.6rem 1.1rem;
+  background: transparent;
+  border: 1px solid rgba(242, 240, 236, 0.4);
+  color: #f2f0ec;
+  font-family: inherit;
+  font-size: 0.8rem;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.privacy-close:hover {
+  border-color: #f2f0ec;
+}
+
 .hp-field {
   position: absolute;
   left: -9999px;
