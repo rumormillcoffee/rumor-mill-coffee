@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rumor Mill Coffee</title>
+<meta name="description" content="Rumor Mill Coffee — limited release coffee drops. Spread the word.">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="bg"></div>
+<div class="overlay"></div>
+
+<main class="stage">
+  <header class="brand">
+    <h1>Rumor Mill Coffee</h1>
+  </header>
+
+  <section class="content">
+    <p class="description">
+      Small-batch, limited-release coffee. Drops are announced by word of
+      mouth — sign up and you'll be the first to know.
+    </p>
+
+    <form id="signup-form" class="signup-form" novalidate>
+      <label for="email" class="sr-only">Email address</label>
+      <input type="email" id="email" name="email" placeholder="your@email.com" required autocomplete="email">
+      <!-- honeypot field, hidden from real users -->
+      <input type="text" id="company" name="company" class="hp-field" tabindex="-1" autocomplete="off">
+      <button type="submit">Notify Me</button>
+    </form>
+    <p id="form-message" class="form-message" role="status" aria-live="polite"></p>
+  </section>
+
+  <footer class="tagline">
+    <p>spread the word</p>
+  </footer>
+</main>
+
+<script src="js/main.js"></script>
+</body>
+</html>

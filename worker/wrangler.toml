@@ -1,0 +1,16 @@
+name = "rumor-mill-coffee-signup"
+main = "index.js"
+compatibility_date = "2024-01-01"
+
+# Set these with:
+#   wrangler secret put GITHUB_TOKEN
+#   wrangler secret put GITHUB_REPO
+#   wrangler secret put ALLOWED_ORIGIN
+#
+# Or as plain vars here if you don't mind them in source control
+# (GITHUB_TOKEN should always be a secret, never a plain var):
+# [vars]
+# GITHUB_REPO = "your-username/rumor-mill-coffee"
+# ALLOWED_ORIGIN = "https://your-username.github.io"
+# GITHUB_BRANCH = "main"
+# DATA_PATH = "data/subscribers.json"
