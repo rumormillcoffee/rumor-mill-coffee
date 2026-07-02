@@ -18,9 +18,19 @@ const honeypot = document.getElementById("company");
 const message = document.getElementById("form-message");
 const button = form.querySelector("button");
 
+let messageTimeoutId = null;
+
 function setMessage(text, type) {
   message.textContent = text;
   message.className = "form-message" + (type ? " " + type : "");
+
+  clearTimeout(messageTimeoutId);
+  if (type === "success") {
+    messageTimeoutId = setTimeout(() => {
+      message.textContent = "";
+      message.className = "form-message";
+    }, 10000);
+  }
 }
 
 form.addEventListener("submit", async (e) => {
@@ -63,15 +73,28 @@ form.addEventListener("submit", async (e) => {
 });
 
 const privacyModal = document.getElementById("privacy-modal");
+
+function openSheet(dialog) {
+  dialog.showModal();
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => dialog.classList.add("modal-open"));
+  });
+}
+
+function closeSheet(dialog) {
+  dialog.classList.remove("modal-open");
+  dialog.addEventListener("transitionend", () => dialog.close(), { once: true });
+}
+
 document.getElementById("privacy-link").addEventListener("click", () => {
-  privacyModal.showModal();
+  openSheet(privacyModal);
 });
 document.getElementById("privacy-close").addEventListener("click", () => {
-  privacyModal.close();
+  closeSheet(privacyModal);
 });
 privacyModal.addEventListener("click", (e) => {
   if (e.target === privacyModal) {
-    privacyModal.close();
+    closeSheet(privacyModal);
   }
 });
 
