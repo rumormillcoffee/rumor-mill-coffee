@@ -157,30 +157,17 @@ body {
 }
 
 .modal {
-  position: fixed;
-  top: 10vh;
   max-width: 420px;
   width: calc(100% - 3rem);
   padding: 2rem;
-  border: 1px solid rgba(242, 240, 236, 0.25);
+  border: 1px solid rgba(20, 20, 20, 0.15);
   border-radius: 2px;
-  background: #141414;
-  color: #f2f0ec;
-  overflow: hidden;
-}
-
-.modal::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
-  mix-blend-mode: overlay;
-  opacity: 0.4;
-  pointer-events: none;
+  background: #f2f0ec;
+  color: #141414;
 }
 
 .modal::backdrop {
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.5);
 }
 
 .modal h2 {
@@ -195,7 +182,7 @@ body {
 .modal p {
   font-size: 0.85rem;
   line-height: 1.6;
-  color: rgba(242, 240, 236, 0.8);
+  color: rgba(20, 20, 20, 0.75);
   margin-bottom: 1rem;
 }
 
@@ -206,8 +193,8 @@ body {
 .privacy-close {
   padding: 0.6rem 1.1rem;
   background: transparent;
-  border: 1px solid rgba(242, 240, 236, 0.4);
-  color: #f2f0ec;
+  border: 1px solid rgba(20, 20, 20, 0.35);
+  color: #141414;
   font-family: inherit;
   font-size: 0.8rem;
   border-radius: 2px;
@@ -215,7 +202,16 @@ body {
 }
 
 .privacy-close:hover {
-  border-color: #f2f0ec;
+  border-color: #141414;
+}
+
+.flavor-survey h2 {
+  font-family: fiona, sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 1.5rem;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.5rem;
 }
 
 .flavor-subtext {
@@ -255,7 +251,7 @@ body {
 
 .flavor-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 0.75rem;
 }
 

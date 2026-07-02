@@ -44,7 +44,7 @@ form.addEventListener("submit", async (e) => {
 
     setMessage("You're on the list.", "success");
     form.reset();
-    openFlavorModal(email);
+    showFlavorStep(email);
   } catch (err) {
     setMessage(err.message || "Something went wrong. Try again.", "error");
   } finally {
@@ -65,18 +65,25 @@ privacyModal.addEventListener("click", (e) => {
   }
 });
 
-const flavorModal = document.getElementById("flavor-modal");
+const signupStep = document.getElementById("signup-step");
+const flavorStep = document.getElementById("flavor-step");
 const flavorTags = document.getElementById("flavor-tags");
 const flavorSubmit = document.getElementById("flavor-submit");
 const flavorSkip = document.getElementById("flavor-skip");
 const selectedFlavors = new Set();
 let pendingEmail = null;
 
-function openFlavorModal(email) {
+function showFlavorStep(email) {
   pendingEmail = email;
   selectedFlavors.clear();
   flavorTags.querySelectorAll(".flavor-tag").forEach((tag) => tag.classList.remove("selected"));
-  flavorModal.showModal();
+  signupStep.hidden = true;
+  flavorStep.hidden = false;
+}
+
+function finishFlavorStep(finalMessage) {
+  flavorStep.hidden = true;
+  setMessage(finalMessage, "success");
 }
 
 flavorTags.addEventListener("click", (e) => {
@@ -94,12 +101,12 @@ flavorTags.addEventListener("click", (e) => {
 });
 
 flavorSkip.addEventListener("click", () => {
-  flavorModal.close();
+  finishFlavorStep("You're on the list.");
 });
 
 flavorSubmit.addEventListener("click", async () => {
   if (selectedFlavors.size === 0) {
-    flavorModal.close();
+    finishFlavorStep("You're on the list.");
     return;
   }
 
@@ -115,6 +122,6 @@ flavorSubmit.addEventListener("click", async () => {
     // non-critical — the signup itself already succeeded
   } finally {
     flavorSubmit.disabled = false;
-    flavorModal.close();
+    finishFlavorStep("You're on the list. Thanks for sharing your taste.");
   }
 });
