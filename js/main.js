@@ -199,9 +199,31 @@ shareSkip.addEventListener("click", () => {
   finishOnboarding("You're on the list.");
 });
 
+async function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  // Clipboard API requires HTTPS — fall back to the legacy technique for
+  // plain-HTTP contexts.
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+  const copied = document.execCommand("copy");
+  document.body.removeChild(textarea);
+  if (!copied) {
+    throw new Error("Copy failed");
+  }
+}
+
 shareCopy.addEventListener("click", async () => {
   try {
-    await navigator.clipboard.writeText(buildInviteText());
+    await copyText(buildInviteText());
     shareSubtext.textContent = "Link copied! Paste it into a text and send to a friend.";
     shareActions.hidden = true;
     shareDoneActions.hidden = false;
