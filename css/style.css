@@ -156,35 +156,50 @@ body {
   color: rgba(242, 240, 236, 0.7);
 }
 
-.privacy-modal {
+.modal {
+  position: fixed;
+  top: 10vh;
   max-width: 420px;
   width: calc(100% - 3rem);
   padding: 2rem;
-  border: 1px solid rgba(242, 240, 236, 0.2);
-  border-radius: 4px;
+  border: 1px solid rgba(242, 240, 236, 0.25);
+  border-radius: 2px;
   background: #141414;
   color: #f2f0ec;
+  overflow: hidden;
 }
 
-.privacy-modal::backdrop {
-  background: rgba(0, 0, 0, 0.6);
+.modal::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  opacity: 0.4;
+  pointer-events: none;
 }
 
-.privacy-modal h2 {
-  font-family: 'Inter', sans-serif;
-  font-size: 1rem;
-  font-weight: 500;
-  margin-bottom: 1rem;
+.modal::backdrop {
+  background: rgba(0, 0, 0, 0.65);
 }
 
-.privacy-modal p {
+.modal h2 {
+  font-family: fiona, sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 1.5rem;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.75rem;
+}
+
+.modal p {
   font-size: 0.85rem;
   line-height: 1.6;
   color: rgba(242, 240, 236, 0.8);
   margin-bottom: 1rem;
 }
 
-.privacy-modal a {
+.modal a {
   color: inherit;
 }
 
@@ -201,27 +216,6 @@ body {
 
 .privacy-close:hover {
   border-color: #f2f0ec;
-}
-
-.flavor-modal {
-  max-width: 420px;
-  width: calc(100% - 3rem);
-  padding: 2rem;
-  border: 1px solid rgba(242, 240, 236, 0.2);
-  border-radius: 4px;
-  background: #141414;
-  color: #f2f0ec;
-}
-
-.flavor-modal::backdrop {
-  background: rgba(0, 0, 0, 0.6);
-}
-
-.flavor-modal h2 {
-  font-family: 'Inter', sans-serif;
-  font-size: 1rem;
-  font-weight: 500;
-  margin-bottom: 0.4rem;
 }
 
 .flavor-subtext {
