@@ -85,6 +85,8 @@ function showFlavorStep(email) {
 
 function finishFlavorStep(finalMessage) {
   flavorStep.hidden = true;
+  description.hidden = false;
+  signupStep.hidden = false;
   setMessage(finalMessage, "success");
 }
 
