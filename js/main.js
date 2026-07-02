@@ -129,7 +129,7 @@ function showFlavorStep(email, referralCode) {
 
 function buildInviteText() {
   const link = `${window.location.origin}/?ref=${pendingReferralCode}`;
-  return `Sign up for limited-release coffee drops from Rumor Mill Coffee! ${link}`;
+  return `Sign up for limited-release coffee drops from Rumor Mill Coffee: ${link}`;
 }
 
 function showShareStep() {
