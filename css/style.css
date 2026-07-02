@@ -21,7 +21,7 @@ body {
   inset: 0;
   z-index: -2;
   background: url('../assets/bg.jpg') center/cover no-repeat;
-  filter: grayscale(1) contrast(1.15);
+  filter: contrast(1.15);
 }
 
 /* grain texture */
