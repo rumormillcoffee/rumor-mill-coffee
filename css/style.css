@@ -16,16 +16,11 @@ body {
   overflow: hidden;
 }
 
-/* Full-screen background. Swap this for a real photo/video by replacing
-   the gradient with: background: url('../assets/bg.jpg') center/cover no-repeat; */
 .bg {
   position: fixed;
   inset: 0;
   z-index: -2;
-  background:
-    radial-gradient(ellipse at 30% 20%, #3a3a3a 0%, transparent 55%),
-    radial-gradient(ellipse at 75% 70%, #2a2a2a 0%, transparent 60%),
-    linear-gradient(160deg, #0a0a0a 0%, #1c1c1c 45%, #0a0a0a 100%);
+  background: url('../assets/bg.jpg') center/cover no-repeat;
   filter: grayscale(1) contrast(1.15);
 }
 
