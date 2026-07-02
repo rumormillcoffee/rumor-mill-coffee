@@ -106,6 +106,7 @@ const flavorSubmit = document.getElementById("flavor-submit");
 const flavorSkip = document.getElementById("flavor-skip");
 const shareStep = document.getElementById("share-step");
 const shareSubtext = document.getElementById("share-subtext");
+const sharePreview = document.getElementById("share-preview");
 const shareActions = document.getElementById("share-actions");
 const shareDoneActions = document.getElementById("share-done-actions");
 const shareSkip = document.getElementById("share-skip");
@@ -126,6 +127,11 @@ function showFlavorStep(email, referralCode) {
   flavorStep.hidden = false;
 }
 
+function buildInviteText() {
+  const link = `${window.location.origin}/?ref=${pendingReferralCode}`;
+  return `Sign up for limited-release coffee drops from Rumor Mill Coffee! ${link}`;
+}
+
 function showShareStep() {
   flavorStep.hidden = true;
 
@@ -135,6 +141,7 @@ function showShareStep() {
   }
 
   shareSubtext.textContent = shareDefaultSubtext;
+  sharePreview.textContent = buildInviteText();
   shareActions.hidden = false;
   shareDoneActions.hidden = true;
   shareStep.hidden = false;
@@ -193,11 +200,8 @@ shareSkip.addEventListener("click", () => {
 });
 
 shareCopy.addEventListener("click", async () => {
-  const link = `${window.location.origin}/?ref=${pendingReferralCode}`;
-  const inviteText = `Sign up for limited-release coffee drops from Rumor Mill Coffee! ${link}`;
-
   try {
-    await navigator.clipboard.writeText(inviteText);
+    await navigator.clipboard.writeText(buildInviteText());
     shareSubtext.textContent = "Link copied! Paste it into a text and send to a friend.";
     shareActions.hidden = true;
     shareDoneActions.hidden = false;
