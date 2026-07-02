@@ -163,10 +163,8 @@ body {
   justify-content: center;
   font-family: fiona, sans-serif;
   font-weight: 400;
-  font-style: normal;
+  font-style: oblique;
   font-size: 0.7rem;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
   color: rgba(242, 240, 236, 0.6);
 }
 
