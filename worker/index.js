@@ -7,7 +7,8 @@
 //   GITHUB_TOKEN   - a GitHub Personal Access Token with `contents:write`
 //                    (fine-grained, scoped to this one repo)
 //   GITHUB_REPO    - "your-username/rumor-mill-coffee"
-//   ALLOWED_ORIGIN - "https://your-username.github.io"
+//   ALLOWED_ORIGIN - comma-separated list of allowed origins, e.g.
+//                    "https://your-username.github.io,https://yourdomain.com"
 //
 // Optional vars (defaults shown):
 //   GITHUB_BRANCH  - "main"
@@ -15,6 +16,15 @@
 
 const DATA_PATH_DEFAULT = "data/subscribers.json";
 const BRANCH_DEFAULT = "main";
+
+function resolveOrigin(request, env) {
+  const allowed = (env.ALLOWED_ORIGIN || "").split(",").map((o) => o.trim()).filter(Boolean);
+  const requestOrigin = request.headers.get("Origin");
+  if (requestOrigin && allowed.includes(requestOrigin)) {
+    return requestOrigin;
+  }
+  return allowed[0] || "*";
+}
 
 function corsHeaders(origin) {
   return {
@@ -206,8 +216,7 @@ async function handlePreferences(body, env, dataPath, branch, headers) {
 
 export default {
   async fetch(request, env) {
-    const origin = env.ALLOWED_ORIGIN || "*";
-    const headers = corsHeaders(origin);
+    const headers = corsHeaders(resolveOrigin(request, env));
 
     if (request.method === "OPTIONS") {
       return new Response(null, { headers });
