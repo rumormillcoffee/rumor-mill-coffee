@@ -28,6 +28,16 @@ function isValidEmail(email) {
   return typeof email === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+function isValidReferralCode(code) {
+  return typeof code === "string" && /^[a-z0-9]{6,12}$/.test(code);
+}
+
+function generateReferralCode() {
+  return Array.from(crypto.getRandomValues(new Uint8Array(6)))
+    .map((b) => (b % 36).toString(36))
+    .join("");
+}
+
 function base64Encode(str) {
   return btoa(unescape(encodeURIComponent(str)));
 }
@@ -89,17 +99,49 @@ async function handleSubscribe(body, env, dataPath, branch, headers) {
     });
   }
 
+  const referredBy = isValidReferralCode(body.referredBy) ? body.referredBy : null;
   const { subscribers, sha } = await readSubscribers(env, dataPath, branch);
 
-  if (subscribers.some((s) => s.email === email)) {
-    return new Response(JSON.stringify({ ok: true, duplicate: true }), {
+  const existing = subscribers.find((s) => s.email === email);
+  if (existing) {
+    return new Response(JSON.stringify({ ok: true, duplicate: true, referralCode: existing.referralCode }), {
       status: 200,
       headers: { ...headers, "Content-Type": "application/json" },
     });
   }
 
-  subscribers.push({ email, subscribedAt: new Date().toISOString() });
+  const referralCode = generateReferralCode();
+  subscribers.push({
+    email,
+    subscribedAt: new Date().toISOString(),
+    referralCode,
+    referredBy,
+    referralClicks: 0,
+  });
   await writeSubscribers(env, dataPath, branch, subscribers, sha, "Add subscriber");
+
+  return new Response(JSON.stringify({ ok: true, referralCode }), {
+    status: 200,
+    headers: { ...headers, "Content-Type": "application/json" },
+  });
+}
+
+async function handleRefClick(body, env, dataPath, branch, headers) {
+  const code = body.code;
+  if (!isValidReferralCode(code)) {
+    return new Response(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: { ...headers, "Content-Type": "application/json" },
+    });
+  }
+
+  const { subscribers, sha } = await readSubscribers(env, dataPath, branch);
+  const referrer = subscribers.find((s) => s.referralCode === code);
+
+  if (referrer) {
+    referrer.referralClicks = (referrer.referralClicks || 0) + 1;
+    await writeSubscribers(env, dataPath, branch, subscribers, sha, "Record referral click");
+  }
 
   return new Response(JSON.stringify({ ok: true }), {
     status: 200,
@@ -170,6 +212,9 @@ export default {
     try {
       if (pathname === "/preferences") {
         return await handlePreferences(body, env, dataPath, branch, headers);
+      }
+      if (pathname === "/ref-click") {
+        return await handleRefClick(body, env, dataPath, branch, headers);
       }
       return await handleSubscribe(body, env, dataPath, branch, headers);
     } catch (err) {

@@ -1,6 +1,16 @@
 const WORKER_BASE = "https://rumor-mill-coffee-signup.rumormillcoffee.workers.dev";
 const SUBSCRIBE_ENDPOINT = `${WORKER_BASE}/subscribe`;
 const PREFERENCES_ENDPOINT = `${WORKER_BASE}/preferences`;
+const REF_CLICK_ENDPOINT = `${WORKER_BASE}/ref-click`;
+
+const referredByCode = new URLSearchParams(window.location.search).get("ref");
+if (referredByCode) {
+  fetch(REF_CLICK_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code: referredByCode }),
+  }).catch(() => {});
+}
 
 const form = document.getElementById("signup-form");
 const emailInput = document.getElementById("email");
@@ -33,7 +43,7 @@ form.addEventListener("submit", async (e) => {
     const res = await fetch(SUBSCRIBE_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, referredBy: referredByCode || undefined }),
     });
 
     const data = await res.json().catch(() => ({}));
@@ -44,7 +54,7 @@ form.addEventListener("submit", async (e) => {
 
     setMessage("You're on the list.", "success");
     form.reset();
-    showFlavorStep(email);
+    showFlavorStep(email, data.referralCode);
   } catch (err) {
     setMessage(err.message || "Something went wrong. Try again.", "error");
   } finally {
@@ -71,11 +81,16 @@ const flavorStep = document.getElementById("flavor-step");
 const flavorTags = document.getElementById("flavor-tags");
 const flavorSubmit = document.getElementById("flavor-submit");
 const flavorSkip = document.getElementById("flavor-skip");
+const shareStep = document.getElementById("share-step");
+const shareSkip = document.getElementById("share-skip");
+const shareCopy = document.getElementById("share-copy");
 const selectedFlavors = new Set();
 let pendingEmail = null;
+let pendingReferralCode = null;
 
-function showFlavorStep(email) {
+function showFlavorStep(email, referralCode) {
   pendingEmail = email;
+  pendingReferralCode = referralCode || null;
   selectedFlavors.clear();
   flavorTags.querySelectorAll(".flavor-tag").forEach((tag) => tag.classList.remove("selected"));
   description.hidden = true;
@@ -83,8 +98,20 @@ function showFlavorStep(email) {
   flavorStep.hidden = false;
 }
 
-function finishFlavorStep(finalMessage) {
+function showShareStep() {
   flavorStep.hidden = true;
+
+  if (!pendingReferralCode) {
+    finishOnboarding("You're on the list.");
+    return;
+  }
+
+  shareStep.hidden = false;
+}
+
+function finishOnboarding(finalMessage) {
+  flavorStep.hidden = true;
+  shareStep.hidden = true;
   description.hidden = false;
   signupStep.hidden = false;
   setMessage(finalMessage, "success");
@@ -105,12 +132,12 @@ flavorTags.addEventListener("click", (e) => {
 });
 
 flavorSkip.addEventListener("click", () => {
-  finishFlavorStep("You're on the list.");
+  showShareStep();
 });
 
 flavorSubmit.addEventListener("click", async () => {
   if (selectedFlavors.size === 0) {
-    finishFlavorStep("You're on the list.");
+    showShareStep();
     return;
   }
 
@@ -126,6 +153,22 @@ flavorSubmit.addEventListener("click", async () => {
     // non-critical — the signup itself already succeeded
   } finally {
     flavorSubmit.disabled = false;
-    finishFlavorStep("You're on the list. Thanks for sharing your taste.");
+    showShareStep();
+  }
+});
+
+shareSkip.addEventListener("click", () => {
+  finishOnboarding("You're on the list.");
+});
+
+shareCopy.addEventListener("click", async () => {
+  const link = `${window.location.origin}/?ref=${pendingReferralCode}`;
+  const inviteText = `Sign up for limited-release coffee drops from Rumor Mill Coffee! ${link}`;
+
+  try {
+    await navigator.clipboard.writeText(inviteText);
+    finishOnboarding("Link copied! Thanks for spreading the word.");
+  } catch {
+    finishOnboarding("You're on the list.");
   }
 });
