@@ -1,4 +1,6 @@
-const SUBSCRIBE_ENDPOINT = "https://rumor-mill-coffee-signup.rumormillcoffee.workers.dev/subscribe";
+const WORKER_BASE = "https://rumor-mill-coffee-signup.rumormillcoffee.workers.dev";
+const SUBSCRIBE_ENDPOINT = `${WORKER_BASE}/subscribe`;
+const PREFERENCES_ENDPOINT = `${WORKER_BASE}/preferences`;
 
 const form = document.getElementById("signup-form");
 const emailInput = document.getElementById("email");
@@ -42,6 +44,7 @@ form.addEventListener("submit", async (e) => {
 
     setMessage("You're on the list.", "success");
     form.reset();
+    openFlavorModal(email);
   } catch (err) {
     setMessage(err.message || "Something went wrong. Try again.", "error");
   } finally {
@@ -59,5 +62,59 @@ document.getElementById("privacy-close").addEventListener("click", () => {
 privacyModal.addEventListener("click", (e) => {
   if (e.target === privacyModal) {
     privacyModal.close();
+  }
+});
+
+const flavorModal = document.getElementById("flavor-modal");
+const flavorTags = document.getElementById("flavor-tags");
+const flavorSubmit = document.getElementById("flavor-submit");
+const flavorSkip = document.getElementById("flavor-skip");
+const selectedFlavors = new Set();
+let pendingEmail = null;
+
+function openFlavorModal(email) {
+  pendingEmail = email;
+  selectedFlavors.clear();
+  flavorTags.querySelectorAll(".flavor-tag").forEach((tag) => tag.classList.remove("selected"));
+  flavorModal.showModal();
+}
+
+flavorTags.addEventListener("click", (e) => {
+  const tag = e.target.closest(".flavor-tag");
+  if (!tag) return;
+
+  const flavor = tag.dataset.flavor;
+  if (selectedFlavors.has(flavor)) {
+    selectedFlavors.delete(flavor);
+    tag.classList.remove("selected");
+  } else {
+    selectedFlavors.add(flavor);
+    tag.classList.add("selected");
+  }
+});
+
+flavorSkip.addEventListener("click", () => {
+  flavorModal.close();
+});
+
+flavorSubmit.addEventListener("click", async () => {
+  if (selectedFlavors.size === 0) {
+    flavorModal.close();
+    return;
+  }
+
+  flavorSubmit.disabled = true;
+
+  try {
+    await fetch(PREFERENCES_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: pendingEmail, flavors: Array.from(selectedFlavors) }),
+    });
+  } catch {
+    // non-critical — the signup itself already succeeded
+  } finally {
+    flavorSubmit.disabled = false;
+    flavorModal.close();
   }
 });

@@ -42,9 +42,28 @@
 
 <dialog id="privacy-modal" class="privacy-modal">
   <h2>Privacy Policy</h2>
-  <p>We collect only your email address, and use it solely to let you know about upcoming limited-release coffee drops.</p>
+  <p>We collect your email address, and optionally your flavor preferences, and use them solely to let you know about upcoming limited-release coffee drops.</p>
   <p>We don't sell, rent, or share your information with anyone else. To be removed at any time, just email <a href="mailto:hello@rumormillcoffee.com">hello@rumormillcoffee.com</a>.</p>
   <button type="button" id="privacy-close" class="privacy-close">Close</button>
+</dialog>
+
+<dialog id="flavor-modal" class="flavor-modal">
+  <h2>What's your go-to flavor profile?</h2>
+  <p class="flavor-subtext">Optional — helps us tailor future drops.</p>
+  <div class="flavor-tags" id="flavor-tags">
+    <button type="button" class="flavor-tag" data-flavor="balanced">balanced</button>
+    <button type="button" class="flavor-tag" data-flavor="full body">full body</button>
+    <button type="button" class="flavor-tag" data-flavor="complex">complex</button>
+    <button type="button" class="flavor-tag" data-flavor="fruity">fruity</button>
+    <button type="button" class="flavor-tag" data-flavor="bright">bright</button>
+    <button type="button" class="flavor-tag" data-flavor="bold">bold</button>
+    <button type="button" class="flavor-tag" data-flavor="crisp">crisp</button>
+    <button type="button" class="flavor-tag" data-flavor="light">light</button>
+  </div>
+  <div class="flavor-actions">
+    <button type="button" id="flavor-skip" class="flavor-skip">Skip</button>
+    <button type="button" id="flavor-submit" class="flavor-submit">Submit</button>
+  </div>
 </dialog>
 
 <script src="js/main.js"></script>

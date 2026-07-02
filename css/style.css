@@ -203,6 +203,98 @@ body {
   border-color: #f2f0ec;
 }
 
+.flavor-modal {
+  max-width: 420px;
+  width: calc(100% - 3rem);
+  padding: 2rem;
+  border: 1px solid rgba(242, 240, 236, 0.2);
+  border-radius: 4px;
+  background: #141414;
+  color: #f2f0ec;
+}
+
+.flavor-modal::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.flavor-modal h2 {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.4rem;
+}
+
+.flavor-subtext {
+  font-size: 0.75rem;
+  color: rgba(242, 240, 236, 0.5);
+  margin-bottom: 1.25rem;
+}
+
+.flavor-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.flavor-tag {
+  padding: 0.5rem 0.9rem;
+  background: transparent;
+  border: 1px solid rgba(242, 240, 236, 0.35);
+  color: #f2f0ec;
+  font-family: inherit;
+  font-size: 0.8rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.flavor-tag:hover {
+  border-color: #f2f0ec;
+}
+
+.flavor-tag.selected {
+  background: #f2f0ec;
+  color: #0a0a0a;
+  border-color: #f2f0ec;
+}
+
+.flavor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.flavor-skip {
+  padding: 0.6rem 1.1rem;
+  background: transparent;
+  border: none;
+  color: rgba(242, 240, 236, 0.6);
+  font-family: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.flavor-skip:hover {
+  color: #f2f0ec;
+}
+
+.flavor-submit {
+  padding: 0.6rem 1.1rem;
+  background: #f2f0ec;
+  color: #0a0a0a;
+  border: none;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.flavor-submit:hover {
+  opacity: 0.85;
+}
+
 .hp-field {
   position: absolute;
   left: -9999px;

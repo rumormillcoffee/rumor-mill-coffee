@@ -50,6 +50,93 @@ async function githubRequest(env, path, options = {}) {
   return res;
 }
 
+async function readSubscribers(env, dataPath, branch) {
+  const getRes = await githubRequest(env, `${dataPath}?ref=${branch}`);
+
+  if (getRes.status === 200) {
+    const fileData = await getRes.json();
+    return { subscribers: JSON.parse(base64Decode(fileData.content)), sha: fileData.sha };
+  }
+  if (getRes.status === 404) {
+    return { subscribers: [], sha: undefined };
+  }
+  throw new Error(`GitHub read failed: ${getRes.status}`);
+}
+
+async function writeSubscribers(env, dataPath, branch, subscribers, sha, message) {
+  const putRes = await githubRequest(env, dataPath, {
+    method: "PUT",
+    body: JSON.stringify({
+      message,
+      content: base64Encode(JSON.stringify(subscribers, null, 2)),
+      branch,
+      ...(sha ? { sha } : {}),
+    }),
+  });
+
+  if (!putRes.ok) {
+    const errBody = await putRes.text();
+    throw new Error(`GitHub write failed: ${putRes.status} ${errBody}`);
+  }
+}
+
+async function handleSubscribe(body, env, dataPath, branch, headers) {
+  const email = (body.email || "").trim().toLowerCase();
+  if (!isValidEmail(email)) {
+    return new Response(JSON.stringify({ error: "Invalid email address" }), {
+      status: 400,
+      headers: { ...headers, "Content-Type": "application/json" },
+    });
+  }
+
+  const { subscribers, sha } = await readSubscribers(env, dataPath, branch);
+
+  if (subscribers.some((s) => s.email === email)) {
+    return new Response(JSON.stringify({ ok: true, duplicate: true }), {
+      status: 200,
+      headers: { ...headers, "Content-Type": "application/json" },
+    });
+  }
+
+  subscribers.push({ email, subscribedAt: new Date().toISOString() });
+  await writeSubscribers(env, dataPath, branch, subscribers, sha, "Add subscriber");
+
+  return new Response(JSON.stringify({ ok: true }), {
+    status: 200,
+    headers: { ...headers, "Content-Type": "application/json" },
+  });
+}
+
+async function handlePreferences(body, env, dataPath, branch, headers) {
+  const email = (body.email || "").trim().toLowerCase();
+  const flavors = Array.isArray(body.flavors) ? body.flavors.filter((f) => typeof f === "string") : [];
+
+  if (!isValidEmail(email) || flavors.length === 0) {
+    return new Response(JSON.stringify({ error: "Invalid request" }), {
+      status: 400,
+      headers: { ...headers, "Content-Type": "application/json" },
+    });
+  }
+
+  const { subscribers, sha } = await readSubscribers(env, dataPath, branch);
+  const subscriber = subscribers.find((s) => s.email === email);
+
+  if (!subscriber) {
+    return new Response(JSON.stringify({ error: "Subscriber not found" }), {
+      status: 404,
+      headers: { ...headers, "Content-Type": "application/json" },
+    });
+  }
+
+  subscriber.flavorProfile = flavors;
+  await writeSubscribers(env, dataPath, branch, subscribers, sha, "Update flavor preferences");
+
+  return new Response(JSON.stringify({ ok: true }), {
+    status: 200,
+    headers: { ...headers, "Content-Type": "application/json" },
+  });
+}
+
 export default {
   async fetch(request, env) {
     const origin = env.ALLOWED_ORIGIN || "*";
@@ -76,63 +163,17 @@ export default {
       });
     }
 
-    const email = (body.email || "").trim().toLowerCase();
-    if (!isValidEmail(email)) {
-      return new Response(JSON.stringify({ error: "Invalid email address" }), {
-        status: 400,
-        headers: { ...headers, "Content-Type": "application/json" },
-      });
-    }
-
     const dataPath = env.DATA_PATH || DATA_PATH_DEFAULT;
     const branch = env.GITHUB_BRANCH || BRANCH_DEFAULT;
+    const { pathname } = new URL(request.url);
 
     try {
-      // 1. Fetch current file (to get its sha + contents)
-      const getRes = await githubRequest(env, `${dataPath}?ref=${branch}`);
-
-      let subscribers = [];
-      let sha;
-
-      if (getRes.status === 200) {
-        const fileData = await getRes.json();
-        sha = fileData.sha;
-        subscribers = JSON.parse(base64Decode(fileData.content));
-      } else if (getRes.status !== 404) {
-        throw new Error(`GitHub read failed: ${getRes.status}`);
+      if (pathname === "/preferences") {
+        return await handlePreferences(body, env, dataPath, branch, headers);
       }
-
-      if (subscribers.some((s) => s.email === email)) {
-        return new Response(JSON.stringify({ ok: true, duplicate: true }), {
-          status: 200,
-          headers: { ...headers, "Content-Type": "application/json" },
-        });
-      }
-
-      subscribers.push({ email, subscribedAt: new Date().toISOString() });
-
-      // 2. Write the updated file back
-      const putRes = await githubRequest(env, dataPath, {
-        method: "PUT",
-        body: JSON.stringify({
-          message: `Add subscriber`,
-          content: base64Encode(JSON.stringify(subscribers, null, 2)),
-          branch,
-          ...(sha ? { sha } : {}),
-        }),
-      });
-
-      if (!putRes.ok) {
-        const errBody = await putRes.text();
-        throw new Error(`GitHub write failed: ${putRes.status} ${errBody}`);
-      }
-
-      return new Response(JSON.stringify({ ok: true }), {
-        status: 200,
-        headers: { ...headers, "Content-Type": "application/json" },
-      });
+      return await handleSubscribe(body, env, dataPath, branch, headers);
     } catch (err) {
-      return new Response(JSON.stringify({ error: "Could not save signup" }), {
+      return new Response(JSON.stringify({ error: "Could not save data" }), {
         status: 500,
         headers: { ...headers, "Content-Type": "application/json" },
       });
