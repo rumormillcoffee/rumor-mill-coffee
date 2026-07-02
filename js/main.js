@@ -65,6 +65,7 @@ privacyModal.addEventListener("click", (e) => {
   }
 });
 
+const description = document.getElementById("description");
 const signupStep = document.getElementById("signup-step");
 const flavorStep = document.getElementById("flavor-step");
 const flavorTags = document.getElementById("flavor-tags");
@@ -77,6 +78,7 @@ function showFlavorStep(email) {
   pendingEmail = email;
   selectedFlavors.clear();
   flavorTags.querySelectorAll(".flavor-tag").forEach((tag) => tag.classList.remove("selected"));
+  description.hidden = true;
   signupStep.hidden = true;
   flavorStep.hidden = false;
 }
