@@ -105,8 +105,13 @@ const flavorTags = document.getElementById("flavor-tags");
 const flavorSubmit = document.getElementById("flavor-submit");
 const flavorSkip = document.getElementById("flavor-skip");
 const shareStep = document.getElementById("share-step");
+const shareSubtext = document.getElementById("share-subtext");
+const shareActions = document.getElementById("share-actions");
+const shareDoneActions = document.getElementById("share-done-actions");
 const shareSkip = document.getElementById("share-skip");
 const shareCopy = document.getElementById("share-copy");
+const shareDone = document.getElementById("share-done");
+const shareDefaultSubtext = shareSubtext.textContent;
 const selectedFlavors = new Set();
 let pendingEmail = null;
 let pendingReferralCode = null;
@@ -129,6 +134,9 @@ function showShareStep() {
     return;
   }
 
+  shareSubtext.textContent = shareDefaultSubtext;
+  shareActions.hidden = false;
+  shareDoneActions.hidden = true;
   shareStep.hidden = false;
 }
 
@@ -190,8 +198,14 @@ shareCopy.addEventListener("click", async () => {
 
   try {
     await navigator.clipboard.writeText(inviteText);
-    finishOnboarding("Link copied! Thanks for spreading the word.");
+    shareSubtext.textContent = "Link copied! Paste it into a text to a friend.";
+    shareActions.hidden = true;
+    shareDoneActions.hidden = false;
   } catch {
     finishOnboarding("You're on the list.");
   }
+});
+
+shareDone.addEventListener("click", () => {
+  finishOnboarding("You're on the list. Thanks for spreading the word.");
 });
