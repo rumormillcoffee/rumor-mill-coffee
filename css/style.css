@@ -160,12 +160,6 @@ body {
   color: rgba(242, 240, 236, 0.7);
 }
 
-.offer-details-link {
-  display: block;
-  margin-top: -0.75rem;
-  margin-bottom: 1.25rem;
-}
-
 .modal {
   position: fixed;
   inset: auto 0 0 0;
