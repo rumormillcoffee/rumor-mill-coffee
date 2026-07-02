@@ -198,7 +198,7 @@ shareCopy.addEventListener("click", async () => {
 
   try {
     await navigator.clipboard.writeText(inviteText);
-    shareSubtext.textContent = "Link copied! Paste it into a text to a friend.";
+    shareSubtext.textContent = "Link copied! Paste it into a text and send to a friend.";
     shareActions.hidden = true;
     shareDoneActions.hidden = false;
   } catch {
