@@ -84,9 +84,39 @@ async function writeSubscribers(env, dataPath, branch, subscribers, sha, message
     }),
   });
 
+  if (putRes.status === 409) {
+    const err = new Error("Conflict");
+    err.conflict = true;
+    throw err;
+  }
   if (!putRes.ok) {
     const errBody = await putRes.text();
     throw new Error(`GitHub write failed: ${putRes.status} ${errBody}`);
+  }
+}
+
+// Re-reads and re-applies `mutate` on conflict, since another request may
+// have committed to the same file between our read and write.
+async function updateSubscribers(env, dataPath, branch, message, mutate, attempts = 6) {
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    const { subscribers, sha } = await readSubscribers(env, dataPath, branch);
+    const { changed, payload } = mutate(subscribers);
+
+    if (!changed) {
+      return payload;
+    }
+
+    try {
+      await writeSubscribers(env, dataPath, branch, subscribers, sha, message);
+      return payload;
+    } catch (err) {
+      if (err.conflict && attempt < attempts) {
+        const backoffMs = 150 * attempt + Math.floor(Math.random() * 150);
+        await new Promise((resolve) => setTimeout(resolve, backoffMs));
+        continue;
+      }
+      throw err;
+    }
   }
 }
 
@@ -100,27 +130,25 @@ async function handleSubscribe(body, env, dataPath, branch, headers) {
   }
 
   const referredBy = isValidReferralCode(body.referredBy) ? body.referredBy : null;
-  const { subscribers, sha } = await readSubscribers(env, dataPath, branch);
 
-  const existing = subscribers.find((s) => s.email === email);
-  if (existing) {
-    return new Response(JSON.stringify({ ok: true, duplicate: true, referralCode: existing.referralCode }), {
-      status: 200,
-      headers: { ...headers, "Content-Type": "application/json" },
+  const result = await updateSubscribers(env, dataPath, branch, "Add subscriber", (subscribers) => {
+    const existing = subscribers.find((s) => s.email === email);
+    if (existing) {
+      return { changed: false, payload: { ok: true, duplicate: true, referralCode: existing.referralCode } };
+    }
+
+    const referralCode = generateReferralCode();
+    subscribers.push({
+      email,
+      subscribedAt: new Date().toISOString(),
+      referralCode,
+      referredBy,
+      referralClicks: 0,
     });
-  }
-
-  const referralCode = generateReferralCode();
-  subscribers.push({
-    email,
-    subscribedAt: new Date().toISOString(),
-    referralCode,
-    referredBy,
-    referralClicks: 0,
+    return { changed: true, payload: { ok: true, referralCode } };
   });
-  await writeSubscribers(env, dataPath, branch, subscribers, sha, "Add subscriber");
 
-  return new Response(JSON.stringify({ ok: true, referralCode }), {
+  return new Response(JSON.stringify(result), {
     status: 200,
     headers: { ...headers, "Content-Type": "application/json" },
   });
@@ -135,15 +163,16 @@ async function handleRefClick(body, env, dataPath, branch, headers) {
     });
   }
 
-  const { subscribers, sha } = await readSubscribers(env, dataPath, branch);
-  const referrer = subscribers.find((s) => s.referralCode === code);
-
-  if (referrer) {
+  const result = await updateSubscribers(env, dataPath, branch, "Record referral click", (subscribers) => {
+    const referrer = subscribers.find((s) => s.referralCode === code);
+    if (!referrer) {
+      return { changed: false, payload: { ok: true } };
+    }
     referrer.referralClicks = (referrer.referralClicks || 0) + 1;
-    await writeSubscribers(env, dataPath, branch, subscribers, sha, "Record referral click");
-  }
+    return { changed: true, payload: { ok: true } };
+  });
 
-  return new Response(JSON.stringify({ ok: true }), {
+  return new Response(JSON.stringify(result), {
     status: 200,
     headers: { ...headers, "Content-Type": "application/json" },
   });
@@ -160,21 +189,17 @@ async function handlePreferences(body, env, dataPath, branch, headers) {
     });
   }
 
-  const { subscribers, sha } = await readSubscribers(env, dataPath, branch);
-  const subscriber = subscribers.find((s) => s.email === email);
+  const result = await updateSubscribers(env, dataPath, branch, "Update flavor preferences", (subscribers) => {
+    const subscriber = subscribers.find((s) => s.email === email);
+    if (!subscriber) {
+      return { changed: false, payload: { error: "Subscriber not found" } };
+    }
+    subscriber.flavorProfile = flavors;
+    return { changed: true, payload: { ok: true } };
+  });
 
-  if (!subscriber) {
-    return new Response(JSON.stringify({ error: "Subscriber not found" }), {
-      status: 404,
-      headers: { ...headers, "Content-Type": "application/json" },
-    });
-  }
-
-  subscriber.flavorProfile = flavors;
-  await writeSubscribers(env, dataPath, branch, subscribers, sha, "Update flavor preferences");
-
-  return new Response(JSON.stringify({ ok: true }), {
-    status: 200,
+  return new Response(JSON.stringify(result), {
+    status: result.error ? 404 : 200,
     headers: { ...headers, "Content-Type": "application/json" },
   });
 }
