@@ -2,6 +2,7 @@ const WORKER_BASE = "https://rumor-mill-coffee-signup.rumormillcoffee.workers.de
 const SUBSCRIBE_ENDPOINT = `${WORKER_BASE}/subscribe`;
 const PREFERENCES_ENDPOINT = `${WORKER_BASE}/preferences`;
 const REF_CLICK_ENDPOINT = `${WORKER_BASE}/ref-click`;
+const TURNSTILE_VERIFY_ENDPOINT = "https://turnstile-siteverify-rumor-mill-coffee.rumormillcoffee.workers.dev/";
 
 const referredByCode = new URLSearchParams(window.location.search).get("ref");
 if (referredByCode) {
@@ -46,10 +47,28 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
+  const turnstileToken = form.querySelector('[name="cf-turnstile-response"]')?.value;
+  if (!turnstileToken) {
+    setMessage("Please complete the verification check.", "error");
+    return;
+  }
+
   button.disabled = true;
   setMessage("Submitting...");
 
   try {
+    const verifyRes = await fetch(TURNSTILE_VERIFY_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: turnstileToken }),
+    });
+    const verifyData = await verifyRes.json().catch(() => ({}));
+
+    if (!verifyData.success) {
+      setMessage("Verification failed. Please try again.", "error");
+      return;
+    }
+
     const res = await fetch(SUBSCRIBE_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
